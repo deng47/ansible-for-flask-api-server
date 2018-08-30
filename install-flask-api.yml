@@ -1,0 +1,46 @@
+- name: Install Flask API Daemon
+  hosts: localhost
+  tasks:
+    - name: Install Python3 and Flask
+      yum: name={{ item }} state=installed
+      with_items:
+        - python34
+        - python34-pip
+
+    - pip:
+        name: flask
+        state: present
+
+    - name: Copy api.py
+      copy:
+        src: /root/api/files/api.py
+        dest: /tmp/api.py
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Copy Systemd Service Config File
+      copy:
+        src: /root/api/files/flask-api.service
+        dest: /lib/systemd/system/flask-api.service
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Copy rsyslog Config File
+      copy:
+        src: /root/api/files/flask-api.conf
+        dest: /etc/rsyslog.d/flask-api.conf
+        owner: root
+        group: root
+        mode: 0644
+
+    - name: Run flask-api
+      service:
+        name: flask-api
+        state: started
+
+    - name: Restart rsyslog
+      service:
+        name: rsyslog
+        state: restarted
