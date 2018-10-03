@@ -1,4 +1,7 @@
 - name: Install Flask API Daemon
+  var:
+    domainname: ddns.net
+    dir_path: /tmp
   hosts: localhost
   tasks:
     - name: Install Python3 and Flask
@@ -6,18 +9,26 @@
       with_items:
         - python34
         - python34-pip
+        - openssl
 
     - pip:
         name: flask
         state: present
 
+    - pip:
+        name: pyopenssl
+        state: present
+
     - name: Copy api.py
       copy:
         src: /root/api/files/api.py
-        dest: /tmp/api.py
+        dest: {{ dir_path }}/api.py
         owner: root
         group: root
         mode: 0755
+
+    - name: Generate self-signed certificate files
+      shell: openssl req  -nodes -new -x509 -keyout {{ dir_path }}/server.key -out {{ dir_path }}/server.crt -subj "/C=/ST=/L=/O=/CN=\*.{{ domainname }}"
 
     - name: Copy Systemd Service Config File
       copy:
