@@ -3,6 +3,8 @@
 from flask import Flask, jsonify
 import re
 
+working_dir = "/opt/"
+
 app = Flask(__name__)
 
 @app.route('/api/MemFree')
@@ -34,4 +36,4 @@ def getpart():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug = True, ssl_context=('server.crt', 'server.key'))
+    app.run(host='0.0.0.0', port='443', debug = True, ssl_context=(working_dir + 'server.crt', working_dir + 'server.key'))
