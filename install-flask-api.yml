@@ -1,7 +1,8 @@
 - name: Install Flask API Daemon
-  var:
+  vars:
     domainname: ddns.net
-    dir_path: /tmp
+    dir_path: "/opt"
+    pwd: "/root/ansible-for-flask-api-server"
   hosts: localhost
   tasks:
     - name: Install Python3 and Flask
@@ -21,30 +22,43 @@
 
     - name: Copy api.py
       copy:
-        src: /root/api/files/api.py
-        dest: {{ dir_path }}/api.py
         owner: root
         group: root
         mode: 0755
+        src: "{{ pwd }}/files/api.py"
+        dest: "{{ dir_path }}/api.py"
 
-    - name: Generate self-signed certificate files
-      shell: openssl req  -nodes -new -x509 -keyout {{ dir_path }}/server.key -out {{ dir_path }}/server.crt -subj "/C=/ST=/L=/O=/CN=\*.{{ domainname }}"
+    - name: Copy self-signed certificate key
+      copy:
+        owner: root
+        group: root
+        mode: 0640
+        src: "{{ pwd }}/files/server.key"
+        dest: "{{ dir_path }}/server.key"
+
+    - name: Copy self-signed certificate
+      copy:
+        owner: root
+        group: root
+        mode: 0640
+        src: "{{ pwd }}/files/server.crt"
+        dest: "{{ dir_path }}/server.crt"
 
     - name: Copy Systemd Service Config File
       copy:
-        src: /root/api/files/flask-api.service
-        dest: /lib/systemd/system/flask-api.service
         owner: root
         group: root
         mode: 0644
+        src: "{{ pwd }}/files/flask-api.service"
+        dest: /lib/systemd/system/flask-api.service
 
     - name: Copy rsyslog Config File
       copy:
-        src: /root/api/files/flask-api.conf
-        dest: /etc/rsyslog.d/flask-api.conf
         owner: root
         group: root
         mode: 0644
+        src: "{{ pwd }}/files/flask-api.conf"
+        dest: /etc/rsyslog.d/flask-api.conf
 
     - name: Run flask-api
       service:
